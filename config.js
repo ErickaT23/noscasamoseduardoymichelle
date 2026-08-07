@@ -10,7 +10,7 @@ const firebaseConfig = {
 
 const config = {
   event: {
-    defaultEventId: "joserafaelynathalia2026",
+    defaultEventId: "eduardoymichelle2027",
     databaseURL: "https://buenosdeseos-twodesign-default-rtdb.firebaseio.com",
     eventIdParam: "eventId",
     legacyFallback: {
@@ -25,33 +25,33 @@ const config = {
     legacyKeyParam: "admin"
   },
   seo: {
-    titulo: "José Rafael & Nathalia • 24.10.2026",
-    descripcion: "Boda de José Rafael González Brol y Nathalia Fernanda Arana Girón - 24 de octubre de 2026",
+    titulo: "Eduardo Marroquin & Michelle Guzmán • 30.01.2027",
+    descripcion: "Boda de Eduardo Marroquin y Michelle Guzmán - 30 de enero de 2027",
     autor: "Two Design"
   },
   pareja: {
-    nombres: "José Rafael & Nathalia",
-    fecha: "24-10-2026",
-    fechaVisible: "24.10.2026"
+    nombres: "Eduardo Marroquin & Michelle Guzmán",
+    fecha: "30-01-2027",
+    fechaVisible: "30.01.2027"
   },
   musica: {
-    titulo: "Playlist José Rafael & Nathalia",
+    titulo: "Playlist Eduardo Marroquin & Michelle Guzmán",
     archivo: "music.mp3"
   },
   evento: {
     ceremonia: {
-      titulo: "Ceremonia",
-      lugar: "Iglesia San Ignacio de Loyola",
-      hora: "4:00 PM",
-      direccion: "Zona 10, Ciudad de Guatemala",
-      ubicacionUrl: "https://maps.app.goo.gl/7547SfvciHp3J1GQ9"
+      titulo: "Ceremonia & Recepción",
+      lugar: "Jardín Versatto",
+      hora: "6:00 PM",
+      direccion: "San Lucas Sacatepéquez, Aldea Chixolis",
+      ubicacionUrl: "https://maps.app.goo.gl/xWviD4Awx3wPaChLA"
     },
     recepcion: {
-      titulo: "Recepción",
-      lugar: "Hotel Barceló",
-      hora: "6:45 PM",
-      direccion: "7a Avenida 15-45, Zona 9, Ciudad de Guatemala",
-      ubicacionUrl: "https://maps.app.goo.gl/d9kznhcLBugGfNWK9"
+      titulo: "Ceremonia & Recepción",
+      lugar: "Jardín Versatto",
+      hora: "6:00 PM",
+      direccion: "San Lucas Sacatepéquez, Aldea Chixolis",
+      ubicacionUrl: "https://maps.app.goo.gl/xWviD4Awx3wPaChLA"
     }
   },
   textos: {
@@ -59,7 +59,7 @@ const config = {
     mensajePases: "Hemos reservado {pases} lugares en su honor"
   },
   footer: {
-    hashtag: "#JoseRafaelYNathalia",
+    hashtag: "#EduardoYMichelle",
     instagramUrl: "https://www.instagram.com/thetwodesign",
     facebookUrl: "https://www.facebook.com/thetwodesign",
     marcaTexto: "Diseño",

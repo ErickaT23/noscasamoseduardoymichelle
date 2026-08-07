@@ -1178,16 +1178,16 @@ function clearEventConfigMigrationMark(eventId) {
 }
 
 async function seedEventConfig() {
-  const eventId = "joserafaelynathalia2026";
+  const eventId = "eduardoymichelle2027";
   const payload = {
     eventId,
-    bride: "Nathalia Fernanda Arana Girón",
-    groom: "José Rafael González Brol",
-    date: "2026-10-24",
-    time: "16:00",
+    bride: "Michelle Guzmán",
+    groom: "Eduardo Marroquin",
+    date: "2027-01-30",
+    time: "18:00",
     timezone: "America/Guatemala",
-    venue: "Iglesia San Ignacio de Loyola",
-    reception: "Hotel Barceló"
+    venue: "Jardín Versatto",
+    reception: "Jardín Versatto"
   };
 
   console.log("[Firebase][seedEventConfig] Inicio", {

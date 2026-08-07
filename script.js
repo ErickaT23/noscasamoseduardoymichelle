@@ -1,4 +1,4 @@
-const eventDate = new Date("2026-10-24T16:00:00-06:00");
+const eventDate = new Date("2027-01-30T18:00:00-06:00");
 const galleryImages = ["images/V1.jpeg", "images/V2.jpeg", "images/V3.jpeg", "images/V4.jpeg", "images/V5.jpeg", "images/H1.jpeg"];
 let currentGalleryIndex = 0;
 let invitationOpened = false;
@@ -131,7 +131,7 @@ function toggleCollapsiblePanel(panel, trigger) {
 }
 
 function getEventId() {
-  return window.config?.event?.defaultEventId || "joserafaelynathalia2026";
+  return window.config?.event?.defaultEventId || "eduardoymichelle2027";
 }
 
 async function handleWishSubmit(event) {
@@ -269,8 +269,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (wishForm) {
     wishForm.addEventListener("submit", handleWishSubmit);
     console.log("[Wishes] Listener de submit conectado al formulario.");
-  } else {
-    console.error("[Wishes] No se encontró el formulario de buenos deseos.");
   }
 
   document.addEventListener("keydown", (event) => {
@@ -292,6 +290,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   waitForDatabase((db) => {
+    const wishesList = document.getElementById("wishes");
+    if (!wishesList) return;
     console.log("[Wishes] Firebase listo. Inicializando suscripción de buenos deseos.", getEventId());
     if (db.subscribeToWishes) db.subscribeToWishes(getEventId(), renderWishes, console.error);
   });

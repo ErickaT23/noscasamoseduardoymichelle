@@ -1,8 +1,8 @@
 const $ = (s) => document.querySelector(s);
 
-const RSVP_OPEN_MESSAGE = "Para nosotros es muy importante que confirmes tu asistencia antes del 30 de septiembre, o bien que nos indiques si no podrás acompañarnos.";
+const RSVP_OPEN_MESSAGE = "Para nosotros es muy importante que confirmes tu asistencia antes del 29 de enero de 2027, o bien que nos indiques si no podrás acompañarnos.";
 const RSVP_CLOSED_MESSAGE = "Los extrañaremos y esperamos tener la oportunidad de compartir con ustedes en otra ocasión. Gracias por su comprensión y por acompañarnos con su cariño y buenos deseos.";
-const RSVP_DEADLINE = new Date("2026-09-30T23:59:59-06:00").getTime();
+const RSVP_DEADLINE = new Date("2027-01-29T23:59:59-06:00").getTime();
 
 function normalizeGuestMembers(rawMembers) {
   if (!Array.isArray(rawMembers)) return [];
@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let confirmedState = null;
   let savingMemberId = null;
 
-  const eventId = window.config?.event?.defaultEventId || "joserafaelynathalia2026";
+  const eventId = window.config?.event?.defaultEventId || "eduardoymichelle2027";
   console.log("[RSVP] Inicializando RSVP", { eventId, guest });
 
   const inputName = $("#rsvpNombre");
@@ -295,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
     confirmedState = buildResolvedState(state);
     renderGuestFields();
     if (inlineBlock) inlineBlock.style.display = "grid";
-    intro.textContent = "Tu confirmación sigue abierta para los integrantes pendientes. No olvides que la fecha máxima es el 30 de septiembre.";
+    intro.textContent = "Tu confirmación sigue abierta para los integrantes pendientes. No olvides que la fecha máxima es el 29 de enero de 2027.";
     msg.style.display = "none";
     msg.className = "rsvp-msg";
     msg.textContent = "";

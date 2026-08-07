@@ -62,7 +62,7 @@
             window.config
             && window.config.event
             && window.config.event.defaultEventId
-            || "joserafaelynathalia2026"
+            || "eduardoymichelle2027"
         ).trim();
 
         return queryEventId || defaultEventId;
