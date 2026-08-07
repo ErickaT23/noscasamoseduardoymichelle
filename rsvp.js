@@ -100,7 +100,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let guest = getGuest();
   let confirmedState = null;
-  let savingMemberId = null;
+  let isSavingGroup = false;
+  let quantityPickerOpen = false;
 
   const eventId = window.config?.event?.defaultEventId || "eduardoymichelle2027";
   console.log("[RSVP] Inicializando RSVP", { eventId, guest });
@@ -138,13 +139,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const getConfirmedMemberIds = () => new Set(getConfirmedMembers().map((member) => String(member.id || "")).filter(Boolean));
   const getDeclinedMemberIds = () => new Set(getDeclinedMembers().map((member) => String(member.id || "")).filter(Boolean));
 
-  const getPendingMembers = () => {
-    const confirmedIds = getConfirmedMemberIds();
-    const declinedIds = getDeclinedMemberIds();
-    return getDisplayMembers().filter((member) => !confirmedIds.has(member.id) && !declinedIds.has(member.id));
-  };
+  const getGroupPasses = () => getDisplayMembers().reduce((total, member) => total + Math.max(1, Number(member.passes || 1)), 0);
 
-  const hasPendingMembers = () => getPendingMembers().length > 0;
+  const buildMembersForConfirmedPasses = (confirmedPasses) => {
+    let remaining = Math.max(0, Number(confirmedPasses) || 0);
+
+    return getDisplayMembers().reduce((selected, member) => {
+      if (remaining <= 0) return selected;
+      const memberPasses = Math.max(1, Number(member.passes || 1));
+      const assignedPasses = Math.min(memberPasses, remaining);
+      remaining -= assignedPasses;
+      selected.push({
+        id: member.id,
+        name: member.name,
+        passes: assignedPasses
+      });
+      return selected;
+    }, []);
+  };
 
   const getMemberStatus = (member) => {
     const confirmedIds = getConfirmedMemberIds();
@@ -168,61 +180,69 @@ document.addEventListener("DOMContentLoaded", () => {
   const renderMembers = () => {
     membersList.innerHTML = "";
 
-    getDisplayMembers().forEach((member) => {
-      const item = document.createElement("div");
-      item.className = "rsvp-member-item";
-      item.dataset.memberId = member.id;
+    const item = document.createElement("div");
+    item.className = "rsvp-member-item";
 
-      const text = document.createElement("div");
-      text.className = "rsvp-member-copy";
-      const strong = document.createElement("strong");
-      const span = document.createElement("span");
-      const status = getMemberStatus(member);
+    const status = confirmedState
+      ? getMemberStatus(getDisplayMembers()[0])
+      : { kind: "open", text: "" };
 
-      strong.textContent = member.name;
-      span.textContent = `${member.passes} ${member.passes === 1 ? "pase asignado" : "pases asignados"}`;
+    const side = document.createElement("div");
 
-      text.appendChild(strong);
-      text.appendChild(span);
+    if (status.kind === "open") {
+      const actions = document.createElement("div");
+      actions.className = "rsvp-member-actions";
 
-      const side = document.createElement("div");
+      const btnYes = document.createElement("button");
+      btnYes.type = "button";
+      btnYes.className = "rsvp-btn";
+      btnYes.dataset.answer = "toggle-yes";
+      btnYes.textContent = "Sí, asistiremos";
+      btnYes.disabled = isSavingGroup;
+      btnYes.setAttribute("aria-expanded", quantityPickerOpen ? "true" : "false");
+      actions.appendChild(btnYes);
 
-      if (status.kind === "open") {
-        const actions = document.createElement("div");
-        actions.className = "rsvp-member-actions";
+      if (quantityPickerOpen) {
+        const qtySelect = document.createElement("select");
+        qtySelect.className = "rsvp-quantity-select";
+        qtySelect.dataset.answer = "yes";
+        qtySelect.disabled = isSavingGroup;
 
-        const btnYes = document.createElement("button");
-        btnYes.type = "button";
-        btnYes.className = "rsvp-btn";
-        btnYes.dataset.memberId = member.id;
-        btnYes.dataset.answer = "yes";
-        btnYes.textContent = "Sí, asistiré";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Selecciona pases";
+        placeholder.selected = true;
+        qtySelect.appendChild(placeholder);
 
-        const btnNo = document.createElement("button");
-        btnNo.type = "button";
-        btnNo.className = "rsvp-btn";
-        btnNo.dataset.memberId = member.id;
-        btnNo.dataset.answer = "no";
-        btnNo.textContent = "No podré asistir";
-
-        if (savingMemberId) {
-          const disableButtons = savingMemberId !== member.id;
-          btnYes.disabled = disableButtons || savingMemberId === member.id;
-          btnNo.disabled = disableButtons || savingMemberId === member.id;
+        for (let count = getGroupPasses(); count >= 1; count -= 1) {
+          const option = document.createElement("option");
+          option.value = String(count);
+          option.textContent = String(count);
+          qtySelect.appendChild(option);
         }
 
-        actions.append(btnYes, btnNo);
-        side.appendChild(actions);
-      } else {
-        const statusEl = document.createElement("span");
-        statusEl.className = `rsvp-member-status is-${status.kind}`;
-        statusEl.textContent = status.text;
-        side.appendChild(statusEl);
+        actions.appendChild(qtySelect);
       }
 
-      item.append(text, side);
-      membersList.appendChild(item);
-    });
+      const btnNo = document.createElement("button");
+      btnNo.type = "button";
+      btnNo.className = "rsvp-btn";
+      btnNo.dataset.answer = "no";
+      btnNo.textContent = "No podremos asistir";
+
+      btnNo.disabled = isSavingGroup;
+
+      actions.appendChild(btnNo);
+      side.appendChild(actions);
+    } else {
+      const statusEl = document.createElement("span");
+      statusEl.className = `rsvp-member-status is-${status.kind}`;
+      statusEl.textContent = status.text;
+      side.appendChild(statusEl);
+    }
+
+    item.append(side);
+    membersList.appendChild(item);
   };
 
   const syncVisibleFields = () => {
@@ -291,16 +311,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   };
 
-  const applyPartialConfirmationState = (state) => {
-    confirmedState = buildResolvedState(state);
-    renderGuestFields();
-    if (inlineBlock) inlineBlock.style.display = "grid";
-    intro.textContent = "Tu confirmación sigue abierta para los integrantes pendientes. No olvides que la fecha máxima es el 29 de enero de 2027.";
-    msg.style.display = "none";
-    msg.className = "rsvp-msg";
-    msg.textContent = "";
-  };
-
   const paintConfirmed = (state) => {
     confirmedState = buildResolvedState(state);
     renderGuestFields();
@@ -358,15 +368,6 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         localStorage.setItem(storageKey, JSON.stringify(remoteState));
         console.log("[RSVP] Confirmación remota encontrada", remoteState);
-        if (
-          getDisplayMembers().length > 0
-          && (remoteState.memberSelections.length + remoteState.declinedSelections.length) > 0
-          && (remoteState.memberSelections.length + remoteState.declinedSelections.length) < getDisplayMembers().length
-        ) {
-          applyPartialConfirmationState(remoteState);
-          return true;
-        }
-
         paintConfirmed(remoteState);
         return true;
       }
@@ -385,15 +386,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const savedState = JSON.parse(savedRaw);
         if (savedState?.eventId === eventId && savedState?.guestId === guest.id) {
           console.log("[RSVP] Usando confirmación local fallback", savedState);
-          if (
-            getDisplayMembers().length > 0
-            && ((savedState.memberSelections || []).length + (savedState.declinedSelections || []).length) > 0
-            && ((savedState.memberSelections || []).length + (savedState.declinedSelections || []).length) < getDisplayMembers().length
-          ) {
-            applyPartialConfirmationState(savedState);
-            return true;
-          }
-
           paintConfirmed(savedState);
           return true;
         }
@@ -411,7 +403,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("guest:updated", () => {
     guest = getGuest();
     confirmedState = null;
-    savingMemberId = null;
+    isSavingGroup = false;
+    quantityPickerOpen = false;
     if (inlineBlock) inlineBlock.classList.remove("is-closed");
     msg.style.display = "none";
     msg.className = "rsvp-msg";
@@ -421,44 +414,47 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   membersList.addEventListener("click", async (event) => {
-    const button = event.target.closest("button[data-member-id][data-answer]");
-    if (!button) return;
+    const toggleButton = event.target.closest('button[data-answer="toggle-yes"]');
+    if (toggleButton && !confirmedState && !isSavingGroup) {
+      quantityPickerOpen = !quantityPickerOpen;
+      renderMembers();
+      return;
+    }
 
-    const submittedAnswer = button.dataset.answer;
-    const memberId = String(button.dataset.memberId || "");
-    const selectedMember = getDisplayMembers().find((member) => member.id === memberId);
+    const button = event.target.closest("button[data-answer]");
+    const select = event.target.closest("select[data-answer]");
+    if (!button && !select) return;
 
-    if (!selectedMember || savingMemberId) return;
+    const submittedAnswer = button?.dataset.answer || select?.dataset.answer;
+    const selectedMembers = getDisplayMembers();
+    const selectedQuantity = Number(select?.value || button?.dataset.quantity || 0);
 
-    console.log("[RSVP] Click confirmar integrante", { submittedAnswer, memberId, guest });
+    if (selectedMembers.length === 0 || isSavingGroup) return;
+
+    console.log("[RSVP] Click confirmar grupo", { submittedAnswer, guest });
 
     if (isRsvpClosed()) {
       applyClosedState();
       return;
     }
 
-    if (getConfirmedMemberIds().has(memberId) || getDeclinedMemberIds().has(memberId)) {
+    if (confirmedState) {
       return;
     }
 
-    savingMemberId = memberId;
+    if (submittedAnswer === "yes" && selectedQuantity <= 0) {
+      return;
+    }
+
+    isSavingGroup = true;
     renderMembers();
 
     const mergedMembers = submittedAnswer === "yes"
-      ? mergeMemberSelections(getConfirmedMembers(), [selectedMember])
-      : getConfirmedMembers();
-    const mergedDeclinedMembers = submittedAnswer === "no"
-      ? mergeMemberSelections(getDeclinedMembers(), [selectedMember])
-      : getDeclinedMembers();
+      ? buildMembersForConfirmedPasses(selectedQuantity || getGroupPasses())
+      : [];
+    const mergedDeclinedMembers = submittedAnswer === "no" ? selectedMembers : [];
     const totalConfirmedGuests = mergedMembers.reduce((total, member) => total + member.passes, 0);
-    const resolvedMemberIds = new Set([
-      ...mergedMembers.map((member) => member.id),
-      ...mergedDeclinedMembers.map((member) => member.id)
-    ]);
-    const hasOpenPendingMembers = getDisplayMembers().some((member) => !resolvedMemberIds.has(member.id));
-    const finalAnswer = hasOpenPendingMembers
-      ? "yes"
-      : (mergedMembers.length > 0 ? "yes" : "no");
+    const finalAnswer = mergedMembers.length > 0 ? "yes" : "no";
 
     const state = {
       eventId,
@@ -507,7 +503,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (error) {
       console.error("[RSVP] Error al guardar confirmación", error);
-      savingMemberId = null;
+      isSavingGroup = false;
       renderMembers();
       msg.style.display = "block";
       msg.className = "rsvp-msg error";
@@ -522,13 +518,9 @@ document.addEventListener("DOMContentLoaded", () => {
       ? "Gracias por confirmar tu asistencia, te vemos pronto"
       : "Lamentamos que no puedas acompanarnos, te extranaremos";
 
-    savingMemberId = null;
+    isSavingGroup = false;
+    quantityPickerOpen = false;
     showResult(popupText);
-    if (hasOpenPendingMembers) {
-      applyPartialConfirmationState(state);
-      return;
-    }
-
     paintConfirmed(state);
   });
 
