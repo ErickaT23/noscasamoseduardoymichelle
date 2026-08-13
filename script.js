@@ -222,25 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".fade-in-element").forEach((el) => observer.observe(el));
   startPhotoSlider();
 
-  const accounts = document.getElementById("accountsBackdrop");
-  document.getElementById("btnVerCuentas")?.addEventListener("click", () => showModal(accounts));
-  document.getElementById("btnCloseAccounts")?.addEventListener("click", () => hideModal(accounts));
-  accounts?.addEventListener("click", (event) => {
-    if (event.target === accounts) hideModal(accounts);
-  });
-  document.querySelectorAll(".copy-account").forEach((button) => {
-    button.addEventListener("click", async () => {
-      const account = button.closest(".account");
-      await copyText(account?.dataset.copy || "");
-      button.textContent = "Copiado";
-      button.classList.add("copied");
-      window.setTimeout(() => {
-        button.textContent = "Copiar";
-        button.classList.remove("copied");
-      }, 1800);
-    });
-  });
-
   document.querySelectorAll("[data-gallery-index]").forEach((button) => {
     button.addEventListener("click", () => openLightbox(Number(button.dataset.galleryIndex || 0)));
   });
