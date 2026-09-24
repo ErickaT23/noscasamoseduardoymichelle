@@ -1,5 +1,5 @@
 const eventDate = new Date("2027-01-30T18:00:00-06:00");
-const galleryImages = ["images/V1.jpeg", "images/V2.jpeg", "images/V3.jpeg", "images/V4.jpeg", "images/V5.jpeg", "images/H1.jpeg"];
+const galleryImages = ["images/G1.jpg", "images/G2.jpg", "images/G3.jpg", "images/FS2.jpg"];
 let currentGalleryIndex = 0;
 let invitationOpened = false;
 let currentSlideIndex = 0;
