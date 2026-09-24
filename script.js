@@ -1,5 +1,5 @@
 const eventDate = new Date("2027-01-30T18:00:00-06:00");
-const galleryImages = ["images/G1.jpg", "images/G2.jpg", "images/G3.jpg", "images/FS2.jpg"];
+const galleryImages = ["images/G1.jpg?v=20260924", "images/G2.jpg?v=20260924", "images/G3.jpg?v=20260924", "images/FS2.jpg?v=20260924", "images/G4.png?v=20260924"];
 let currentGalleryIndex = 0;
 let invitationOpened = false;
 let currentSlideIndex = 0;
@@ -116,11 +116,13 @@ function startPhotoSlider() {
   if (!track) return;
   const slides = track.querySelectorAll("img");
   if (slides.length <= 1) return;
+  slides[0].classList.add("is-active");
 
   window.setInterval(() => {
+    slides[currentSlideIndex].classList.remove("is-active");
     currentSlideIndex = (currentSlideIndex + 1) % slides.length;
-    track.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
-  }, 3500);
+    slides[currentSlideIndex].classList.add("is-active");
+  }, 10000);
 }
 
 function toggleCollapsiblePanel(panel, trigger) {
