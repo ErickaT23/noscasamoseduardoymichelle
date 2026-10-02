@@ -1094,8 +1094,15 @@ async function migrateLocalGuestsToFirebase(arg1, arg2, arg3) {
   }
 
   if (!dryRun) {
+    const existingSnapshot = await get(ref(db, getEventInvitadosPath(eventId)));
+    const existingGuests = existingSnapshot.exists() ? existingSnapshot.val() || {} : {};
+    const guestsToSeed = guests.filter(function (guest) {
+      const guestId = sanitizeFirebaseKey(guest.id);
+      return !Object.prototype.hasOwnProperty.call(existingGuests, guestId);
+    });
+
     await Promise.all(
-      guests.map(function (guest) {
+      guestsToSeed.map(function (guest) {
         const guestId = sanitizeFirebaseKey(guest.id);
         return set(ref(db, getEventInvitadosPath(eventId) + "/" + guestId), {
           id: String(guest.id),
