@@ -459,12 +459,21 @@
         }
 
         try {
-            await state.db.updateInvitado(state.eventId, row.id, {
+            const updated = await state.db.updateInvitado(state.eventId, row.id, {
                 id: row.id,
                 nombre,
                 pases,
                 activo
             });
+
+            // Reflect the confirmed Firebase record immediately; onValue will reconcile it afterward.
+            const updatedMap = mapInvitados([updated || {
+                ...row,
+                nombre,
+                pases,
+                activo
+            }]);
+            state.invitadosMap = mergeInvitadosMaps(state.invitadosMap, updatedMap);
 
             state.editingGuestId = null;
             state.editDraft = null;
