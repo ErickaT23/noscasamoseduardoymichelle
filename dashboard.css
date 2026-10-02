@@ -499,6 +499,12 @@ body {
     font-weight: 400;
 }
 
+@media (min-width: 768px) {
+    .name-cell-meta {
+        display: none;
+    }
+}
+
 .date-main,
 .date-sub {
     display: block;
