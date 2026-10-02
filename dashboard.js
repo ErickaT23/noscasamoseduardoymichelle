@@ -752,7 +752,7 @@ document.addEventListener("DOMContentLoaded", function () {
         activeEventId,
         function (invitados) {
             const invitadosArray = Array.isArray(invitados) ? invitados : [];
-            hasRemoteGuestSource = invitadosArray.length > 0;
+            hasRemoteGuestSource = true;
             remoteGuestDirectory = mapInvitadosToDirectory(invitadosArray);
             refreshRowsFromSources();
         },

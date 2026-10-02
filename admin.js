@@ -1580,10 +1580,8 @@
             state.eventId,
             function (invitados) {
                 const invitadosArray = Array.isArray(invitados) ? invitados : [];
-                state.hasRemoteInvitados = invitadosArray.length > 0;
-                state.invitadosMap = state.hasRemoteInvitados
-                    ? mergeInvitadosMaps(state.fallbackInvitadosMap, mapInvitados(invitadosArray))
-                    : state.fallbackInvitadosMap;
+                state.hasRemoteInvitados = true;
+                state.invitadosMap = mergeInvitadosMaps({}, mapInvitados(invitadosArray));
                 refreshView();
             },
             function (error) {
@@ -1622,11 +1620,14 @@
                 || typeof db.subscribeToInvitados !== "function"
                 || typeof db.createInvitado !== "function"
                 || typeof db.updateInvitado !== "function"
-                || typeof db.deleteInvitado !== "function") {
+                || typeof db.deleteInvitado !== "function"
+                || typeof db.migrateLocalGuestsToFirebase !== "function") {
                 throw new Error("RSVPDatabase incompleto para panel admin.");
             }
 
             state.db = db;
+            // Seed the local directory once; subsequent changes are written directly to Firebase.
+            await db.migrateLocalGuestsToFirebase(state.eventId);
             subscribeData(db);
         } catch (error) {
             console.error(error);
