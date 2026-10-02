@@ -102,6 +102,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let confirmedState = null;
   let isSavingGroup = false;
   let quantityPickerOpen = false;
+  let pendingAnswer = null;
+  let pendingQuantity = 0;
 
   const eventId = window.config?.event?.defaultEventId || "eduardoymichelle2027";
   console.log("[RSVP] Inicializando RSVP", { eventId, guest });
@@ -182,12 +184,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const item = document.createElement("div");
     item.className = "rsvp-member-item";
+    const members = getDisplayMembers();
 
     const status = confirmedState
       ? getMemberStatus(getDisplayMembers()[0])
       : { kind: "open", text: "" };
 
     const side = document.createElement("div");
+
+    const names = document.createElement("div");
+    names.className = "rsvp-member-names";
+    members.forEach((member) => {
+      const name = document.createElement("span");
+      name.className = "rsvp-member-name";
+      name.textContent = member.name;
+      names.appendChild(name);
+    });
+    side.appendChild(names);
 
     if (status.kind === "open") {
       const actions = document.createElement("div");
@@ -211,13 +224,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const placeholder = document.createElement("option");
         placeholder.value = "";
         placeholder.textContent = "Selecciona pases";
-        placeholder.selected = true;
+        placeholder.selected = pendingQuantity <= 0;
         qtySelect.appendChild(placeholder);
 
         for (let count = getGroupPasses(); count >= 1; count -= 1) {
           const option = document.createElement("option");
           option.value = String(count);
           option.textContent = String(count);
+          option.selected = count === pendingQuantity;
           qtySelect.appendChild(option);
         }
 
@@ -233,6 +247,16 @@ document.addEventListener("DOMContentLoaded", () => {
       btnNo.disabled = isSavingGroup;
 
       actions.appendChild(btnNo);
+
+      if (pendingAnswer) {
+        const confirmButton = document.createElement("button");
+        confirmButton.type = "button";
+        confirmButton.className = "rsvp-btn rsvp-btn-confirm";
+        confirmButton.dataset.answer = "confirm";
+        confirmButton.textContent = "CONFIRMAR ASISTENCIA";
+        confirmButton.disabled = isSavingGroup;
+        actions.appendChild(confirmButton);
+      }
       side.appendChild(actions);
     } else {
       const statusEl = document.createElement("span");
@@ -405,6 +429,8 @@ document.addEventListener("DOMContentLoaded", () => {
     confirmedState = null;
     isSavingGroup = false;
     quantityPickerOpen = false;
+    pendingAnswer = null;
+    pendingQuantity = 0;
     if (inlineBlock) inlineBlock.classList.remove("is-closed");
     msg.style.display = "none";
     msg.className = "rsvp-msg";
@@ -413,21 +439,40 @@ document.addEventListener("DOMContentLoaded", () => {
     renderGuestFields();
   });
 
+  membersList.addEventListener("change", (event) => {
+    const select = event.target.closest('select[data-answer="yes"]');
+    if (!select || confirmedState || isSavingGroup) return;
+
+    const selectedQuantity = Number(select.value || 0);
+    if (selectedQuantity <= 0) {
+      pendingAnswer = null;
+      pendingQuantity = 0;
+      renderMembers();
+      return;
+    }
+
+    pendingAnswer = "yes";
+    pendingQuantity = selectedQuantity;
+    renderMembers();
+  });
+
   membersList.addEventListener("click", async (event) => {
     const toggleButton = event.target.closest('button[data-answer="toggle-yes"]');
     if (toggleButton && !confirmedState && !isSavingGroup) {
       quantityPickerOpen = !quantityPickerOpen;
+      if (quantityPickerOpen) {
+        pendingAnswer = null;
+        pendingQuantity = 0;
+      }
       renderMembers();
       return;
     }
 
     const button = event.target.closest("button[data-answer]");
-    const select = event.target.closest("select[data-answer]");
-    if (!button && !select) return;
+    if (!button) return;
 
-    const submittedAnswer = button?.dataset.answer || select?.dataset.answer;
+    const submittedAnswer = button.dataset.answer;
     const selectedMembers = getDisplayMembers();
-    const selectedQuantity = Number(select?.value || button?.dataset.quantity || 0);
 
     if (selectedMembers.length === 0 || isSavingGroup) return;
 
@@ -442,19 +487,30 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (submittedAnswer === "yes" && selectedQuantity <= 0) {
+    if (submittedAnswer === "no") {
+      pendingAnswer = "no";
+      pendingQuantity = 0;
+      renderMembers();
       return;
     }
+
+    if (submittedAnswer === "confirm") {
+      if (pendingAnswer === "yes" && pendingQuantity <= 0) return;
+    } else {
+      return;
+    }
+
+    const selectedQuantity = pendingQuantity;
 
     isSavingGroup = true;
     renderMembers();
 
-    const mergedMembers = submittedAnswer === "yes"
+    const mergedMembers = pendingAnswer === "yes"
       ? buildMembersForConfirmedPasses(selectedQuantity || getGroupPasses())
       : [];
-    const mergedDeclinedMembers = submittedAnswer === "no" ? selectedMembers : [];
+    const mergedDeclinedMembers = pendingAnswer === "no" ? selectedMembers : [];
     const totalConfirmedGuests = mergedMembers.reduce((total, member) => total + member.passes, 0);
-    const finalAnswer = mergedMembers.length > 0 ? "yes" : "no";
+    const finalAnswer = pendingAnswer === "yes" && mergedMembers.length > 0 ? "yes" : "no";
 
     const state = {
       eventId,
@@ -509,17 +565,19 @@ document.addEventListener("DOMContentLoaded", () => {
       msg.className = "rsvp-msg error";
       msg.textContent = error?.code === "RSVP_ALREADY_CONFIRMED"
         ? "Esta invitación ya fue confirmada anteriormente."
-        : "Tu confirmación quedó guardada en este dispositivo. Revisa Firebase.";
+        : "No pudimos guardar tu confirmación. Verifica tu conexión e inténtalo nuevamente.";
       return;
     }
 
     console.log("[RSVP] Confirmación completada", state);
-    const popupText = submittedAnswer === "yes"
+    const popupText = pendingAnswer === "yes"
       ? "Gracias por confirmar tu asistencia, te vemos pronto"
       : "Lamentamos que no puedas acompanarnos, te extranaremos";
 
     isSavingGroup = false;
     quantityPickerOpen = false;
+    pendingAnswer = null;
+    pendingQuantity = 0;
     showResult(popupText);
     paintConfirmed(state);
   });

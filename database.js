@@ -651,14 +651,10 @@ async function getConfirmationByGuestId(arg1, arg2) {
   const eventId = parsed.eventId;
   const guestId = parsed.guestId;
 
-  try {
-    const eventSnapshot = await get(getEventRsvpRef(eventId, guestId));
-    if (eventSnapshot.exists()) {
-      const eventData = eventSnapshot.val();
-      if (eventData && typeof eventData === "object") return eventData;
-    }
-  } catch (error) {
-    console.warn("No se pudo leer RSVP por evento:", error);
+  const eventSnapshot = await get(getEventRsvpRef(eventId, guestId));
+  if (eventSnapshot.exists()) {
+    const eventData = eventSnapshot.val();
+    if (eventData && typeof eventData === "object") return eventData;
   }
 
   return null;
