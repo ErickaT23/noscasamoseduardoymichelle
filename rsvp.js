@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
         placeholder.selected = pendingQuantity <= 0;
         qtySelect.appendChild(placeholder);
 
-        for (let count = getGroupPasses(); count >= 1; count -= 1) {
+        for (let count = 1; count <= getGroupPasses(); count += 1) {
           const option = document.createElement("option");
           option.value = String(count);
           option.textContent = String(count);

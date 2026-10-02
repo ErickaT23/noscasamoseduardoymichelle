@@ -1317,19 +1317,7 @@
             timeStrong.textContent = dateParts.time || "--";
             lineTime.append(timeLabel, timeStrong);
 
-            const allMembers = getRowMembers(row);
             const memberLines = [];
-
-            if (allMembers.length > 0) {
-                const lineMembers = document.createElement("div");
-                lineMembers.className = "guest-card-line guest-card-line--stacked";
-                const membersLabel = document.createElement("span");
-                membersLabel.textContent = "Integrantes";
-                const membersStrong = document.createElement("strong");
-                membersStrong.textContent = formatMemberList(allMembers);
-                lineMembers.append(membersLabel, membersStrong);
-                memberLines.push(lineMembers);
-            }
 
             if (Array.isArray(row.integrantesConfirmados) && row.integrantesConfirmados.length > 0) {
                 const lineMembersConfirmed = document.createElement("div");
@@ -1351,18 +1339,6 @@
                 membersDeclinedStrong.textContent = formatMemberList(row.integrantesDeclinados);
                 lineMembersDeclined.append(membersDeclinedLabel, membersDeclinedStrong);
                 memberLines.push(lineMembersDeclined);
-            }
-
-            const pendingMembers = getPendingMembers(row);
-            if (pendingMembers.length > 0) {
-                const lineMembersPending = document.createElement("div");
-                lineMembersPending.className = "guest-card-line guest-card-line--stacked";
-                const membersPendingLabel = document.createElement("span");
-                membersPendingLabel.textContent = "Pendientes";
-                const membersPendingStrong = document.createElement("strong");
-                membersPendingStrong.textContent = formatMemberList(pendingMembers);
-                lineMembersPending.append(membersPendingLabel, membersPendingStrong);
-                memberLines.push(lineMembersPending);
             }
 
             meta.append(linePases, lineConfirmed, lineDate, lineTime, ...memberLines);
