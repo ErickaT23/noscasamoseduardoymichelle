@@ -192,16 +192,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const side = document.createElement("div");
 
-    const names = document.createElement("div");
-    names.className = "rsvp-member-names";
-    members.forEach((member) => {
-      const name = document.createElement("span");
-      name.className = "rsvp-member-name";
-      name.textContent = member.name;
-      names.appendChild(name);
-    });
-    side.appendChild(names);
-
     if (status.kind === "open") {
       const actions = document.createElement("div");
       actions.className = "rsvp-member-actions";
