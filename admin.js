@@ -502,6 +502,26 @@
         }
     }
 
+    async function resetGuestsAndRsvp() {
+        if (!state.db || typeof state.db.resetEventGuestsAndRsvp !== "function") {
+            setStatus("No se pudo inicializar el reinicio.", true);
+            return;
+        }
+
+        if (!window.confirm("Esto borrará todos los invitados y respuestas RSVP del evento actual. ¿Continuar?")) return;
+        if (window.prompt('Escribe BORRAR para confirmar:') !== "BORRAR") return;
+
+        try {
+            await state.db.resetEventGuestsAndRsvp(state.eventId);
+            state.editingGuestId = null;
+            state.editDraft = null;
+            setStatus("Invitados y respuestas RSVP borrados. El evento quedó en cero.", false);
+        } catch (error) {
+            console.error("Error al reiniciar invitados y RSVP:", error);
+            setStatus("No se pudieron borrar los invitados y RSVP.", true);
+        }
+    }
+
     async function reactivateInvitadoFromRow(row) {
         if (!row || !row.id) return;
 
@@ -1488,6 +1508,9 @@
         if (exportBtn) {
             exportBtn.addEventListener("click", exportCsv);
         }
+
+        const resetGuestsBtn = getEl("btn-reset-guests");
+        if (resetGuestsBtn) resetGuestsBtn.addEventListener("click", resetGuestsAndRsvp);
 
         const copyAllLinksBtn = getEl("btn-copy-all-links");
         if (copyAllLinksBtn) {

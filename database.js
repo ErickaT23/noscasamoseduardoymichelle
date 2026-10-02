@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getDatabase, get, onValue, push, ref, runTransaction, set } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+import { getDatabase, get, onValue, push, ref, remove, runTransaction, set } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 
 const firebaseConfig = window.firebaseConfig;
 
@@ -1035,6 +1035,15 @@ async function deleteInvitado(arg1, arg2) {
   return { ok: true, id: guestId, deactivated: true };
 }
 
+async function resetEventGuestsAndRsvp(eventId) {
+  const safeEventId = resolveEventId(eventId);
+  await Promise.all([
+    remove(ref(db, getEventInvitadosPath(safeEventId))),
+    remove(ref(db, getEventRsvpPath(safeEventId)))
+  ]);
+  return { ok: true, eventId: safeEventId };
+}
+
 function subscribeToInvitados(arg1, arg2, arg3) {
   const parsed = parseSubscriptionArgs(arg1, arg2, arg3);
   const eventId = parsed.eventId;
@@ -1561,6 +1570,7 @@ window.RSVPDatabase = {
   createInvitado,
   updateInvitado,
   deleteInvitado,
+  resetEventGuestsAndRsvp,
   migrateLocalGuestsToFirebase,
   clearGuestsMigrationMark,
   seedEventConfig,
@@ -1606,6 +1616,7 @@ export {
   createInvitado,
   updateInvitado,
   deleteInvitado,
+  resetEventGuestsAndRsvp,
   migrateLocalGuestsToFirebase,
   clearGuestsMigrationMark,
   seedEventConfig,
