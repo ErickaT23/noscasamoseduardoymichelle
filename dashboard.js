@@ -573,56 +573,7 @@ function renderMobileCards(rows, emptyMessage, activeFilter) {
         timeValue.textContent = dateParts.time;
         lineTime.append(timeLabel, timeValue);
 
-        const visibleConfirmedMembers = row.integrantesConfirmados;
-        const visibleDeclinedMembers = row.integrantesDeclinados;
-        const visiblePendingMembers = getPendingMembers(row);
-        const allMembers = getRowMembers(row);
-
         details.append(lineAssigned, lineConfirmed, lineDate, lineTime);
-
-        if (allMembers.length > 0) {
-            const lineAllMembers = document.createElement("div");
-            lineAllMembers.className = "confirmation-card-line confirmation-card-line--stacked";
-            const allMembersLabel = document.createElement("span");
-            allMembersLabel.textContent = "Integrantes";
-            const allMembersValue = document.createElement("strong");
-            allMembersValue.textContent = formatConfirmedMembers(allMembers);
-            lineAllMembers.append(allMembersLabel, allMembersValue);
-            details.append(lineAllMembers);
-        }
-
-        if (Array.isArray(visibleConfirmedMembers) && visibleConfirmedMembers.length > 0) {
-            const lineMembers = document.createElement("div");
-            lineMembers.className = "confirmation-card-line confirmation-card-line--stacked";
-            const membersLabel = document.createElement("span");
-            membersLabel.textContent = "Asistencia confirmada";
-            const membersValue = document.createElement("strong");
-            membersValue.textContent = formatConfirmedMembers(visibleConfirmedMembers);
-            lineMembers.append(membersLabel, membersValue);
-            details.append(lineMembers);
-        }
-
-        if (Array.isArray(visibleDeclinedMembers) && visibleDeclinedMembers.length > 0) {
-            const lineDeclined = document.createElement("div");
-            lineDeclined.className = "confirmation-card-line confirmation-card-line--stacked";
-            const declinedLabel = document.createElement("span");
-            declinedLabel.textContent = "No podrán asistir";
-            const declinedValue = document.createElement("strong");
-            declinedValue.textContent = formatConfirmedMembers(visibleDeclinedMembers);
-            lineDeclined.append(declinedLabel, declinedValue);
-            details.append(lineDeclined);
-        }
-
-        if (visiblePendingMembers.length > 0) {
-            const linePending = document.createElement("div");
-            linePending.className = "confirmation-card-line confirmation-card-line--stacked";
-            const pendingLabel = document.createElement("span");
-            pendingLabel.textContent = "Pendientes de Confirmar";
-            const pendingValue = document.createElement("strong");
-            pendingValue.textContent = formatConfirmedMembers(visiblePendingMembers);
-            linePending.append(pendingLabel, pendingValue);
-            details.append(linePending);
-        }
 
         card.append(nameEl, statusWrap, details);
         mobileList.appendChild(card);
