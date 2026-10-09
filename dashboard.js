@@ -615,7 +615,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function getEffectiveGuestDirectory() {
-        if (hasRemoteGuestSource) return remoteGuestDirectory;
+        if (hasRemoteGuestSource) {
+            return {
+                ...fallbackGuestDirectory,
+                ...remoteGuestDirectory
+            };
+        }
         return fallbackGuestDirectory;
     }
 
