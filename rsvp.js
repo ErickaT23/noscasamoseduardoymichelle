@@ -1,8 +1,8 @@
 const $ = (s) => document.querySelector(s);
 
-const RSVP_OPEN_MESSAGE = "Nos encantará contar contigo en este día tan especial. Por favor, indícanos antes del 15 de noviembre de 2026 si podrás acompañarnos.";
+const RSVP_OPEN_MESSAGE = "Nos encantará contar contigo en este día tan especial. Por favor, indícanos si podrás acompañarnos.";
 const RSVP_CLOSED_MESSAGE = "Los extrañaremos y esperamos tener la oportunidad de compartir con ustedes en otra ocasión. Gracias por su comprensión y por acompañarnos con su cariño y buenos deseos.";
-const RSVP_DEADLINE = new Date("2026-11-15T23:59:59-06:00").getTime();
+const RSVP_DEADLINE = Infinity;
 
 function normalizeGuestMembers(rawMembers) {
   if (!Array.isArray(rawMembers)) return [];
